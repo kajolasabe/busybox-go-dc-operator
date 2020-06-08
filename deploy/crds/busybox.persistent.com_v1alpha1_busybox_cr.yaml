@@ -1,4 +1,4 @@
-apiVersion: busybox.github.com/v1alpha1
+apiVersion: busybox.persistent.com/v1alpha1
 kind: Busybox
 metadata:
   name: example-busybox
