@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/busybox/busybox-operator/pkg/controller/busybox"
+	"persistent.com/busybox/busybox-go-operator/pkg/controller/busybox"
 )
 
 func init() {

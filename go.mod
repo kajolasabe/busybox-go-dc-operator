@@ -1,4 +1,4 @@
-module github.com/busybox/busybox-operator
+module persistent.com/busybox/busybox-go-operator
 
 go 1.13
 

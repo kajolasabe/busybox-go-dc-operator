@@ -3,12 +3,12 @@ package busybox
 import (
 	"context"
 
-	busyboxv1alpha1 "persistent.com/busybox/busybox-operator/pkg/apis/busybox/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	busyboxv1alpha1 "persistent.com/busybox/busybox-go-operator/pkg/apis/busybox/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"

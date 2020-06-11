@@ -12,9 +12,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 
-	"github.com/busybox/busybox-operator/pkg/apis"
-	"github.com/busybox/busybox-operator/pkg/controller"
-	"github.com/busybox/busybox-operator/version"
+	"persistent.com/busybox/busybox-go-operator/pkg/apis"
+	"persistent.com/busybox/busybox-go-operator/pkg/controller"
+	"persistent.com/busybox/busybox-go-operator/version"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	kubemetrics "github.com/operator-framework/operator-sdk/pkg/kube-metrics"
@@ -84,7 +84,7 @@ func main() {
 
 	ctx := context.TODO()
 	// Become the leader before proceeding
-	err = leader.Become(ctx, "busybox-operator-lock")
+	err = leader.Become(ctx, "busybox-go-operator-lock")
 	if err != nil {
 		log.Error(err, "")
 		os.Exit(1)

@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: busybox-operator
+  name: busybox-go-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: busybox-operator
+      name: busybox-go-operator
   template:
     metadata:
       labels:
-        name: busybox-operator
+        name: busybox-go-operator
     spec:
-      serviceAccountName: busybox-operator
+      serviceAccountName: busybox-go-operator
       containers:
-        - name: busybox-operator
+        - name: busybox-go-operator
           # Replace this with the built image name
-          image: REPLACE_IMAGE
+          image: quay.io/dhananjaysisode/busybox-operator:v0.0.1
           command:
-          - busybox-operator
+          - busybox-go-operator
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -30,4 +30,4 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "busybox-operator"
+              value: "busybox-go-operator"
