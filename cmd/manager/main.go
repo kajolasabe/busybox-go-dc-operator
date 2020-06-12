@@ -12,9 +12,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 
-	"persistent.com/busybox/busybox-go-operator/pkg/apis"
-	"persistent.com/busybox/busybox-go-operator/pkg/controller"
-	"persistent.com/busybox/busybox-go-operator/version"
+	"persistent.com/busybox/busybox-go-dc-operator/pkg/apis"
+	"persistent.com/busybox/busybox-go-dc-operator/pkg/controller"
+	"persistent.com/busybox/busybox-go-dc-operator/version"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	kubemetrics "github.com/operator-framework/operator-sdk/pkg/kube-metrics"
