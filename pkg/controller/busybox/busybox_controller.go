@@ -100,7 +100,48 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
-	// Define a new Pod object
+	// Check if the DeploymentConfig already exists, if not create a new one
+	deployConfig := &appsv1.DeploymentConfig{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, deployConfig)
+	if err != nil && errors.IsNotFound(err) {
+		// Define a new DeploymentConfig
+		dc := r.deployConfigForBusybox(instance)
+		reqLogger.Info("Creating a new Deployment Config.", "DeploymentConfig.Namespace", dc.Namespace, "DeploymentConfig.Name", dc.Name)
+		err = r.client.Create(context.TODO(), dc)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create new Deployment Config.", "DeploymentConfig.Namespace", dc.Namespace, "DeploymentConfig.Name", dc.Name)
+			return reconcile.Result{}, err
+		}
+		// DeploymentConfig created successfully - return and requeue
+		// NOTE: that the requeue is made with the purpose to provide the deploymentconfig object for the next step to ensure the deploymentconfig size is the same as the spec.
+		// Also, you could GET the deploymentconfig object again instead of requeue if you wish. See more over it here: https://godoc.org/sigs.k8s.io/controller-runtime/pkg/reconcile#Reconciler
+		return reconcile.Result{Requeue: true}, nil
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get Deployment Config.")
+		return reconcile.Result{}, err
+	}
+
+	// deploymentconfig created successfully - don't requeue
+	currentStatus="DeploymentConfig created"
+	if !reflect.DeepEqual(currentStatus, instance.Status.Status) {
+		instance.Status.Status=currentStatus
+		if err := r.client.Status().Update(context.TODO(), instance); err != nil {
+			return reconcile.Result{},err
+		}
+	}
+	// Ensure the deploymentconfig size is the same as the spec
+	size := instance.Spec.Size
+	if *deployConfig.Spec.Replicas != size {
+		deployConfig.Spec.Replicas = &size
+		err = r.client.Update(context.TODO(), deployConfig)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update Deployment Config.", "DeploymentConfig.Namespace", deployConfig.Namespace, "DeploymentDonfig.Name", deployConfig.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	return reconcile.Result{}, nil
+	
+	/*// Define a new Pod object
 	pod := newPodForCR(instance)
 
 	// Set Busybox instance as the owner and controller
@@ -126,11 +167,11 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	// Pod already exists - don't requeue
 	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
-	return reconcile.Result{}, nil
+	return reconcile.Result{}, nil*/
 }
 
 // newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *busyboxv1alpha1.Busybox) *corev1.Pod {
+/*func newPodForCR(cr *busyboxv1alpha1.Busybox) *corev1.Pod {
 	labels := map[string]string{
 		"app": cr.Name,
 	}
@@ -150,4 +191,40 @@ func newPodForCR(cr *busyboxv1alpha1.Busybox) *corev1.Pod {
 			},
 		},
 	}
+}*/
+
+func (r *ReconcileBusybox) deploymentConfigForBusybox(m *busyboxv1alpha1.Busybox) *appsv1.DeploymentConfig {
+	ls := map[string]string{
+		"app": m.Name,
+	}
+	replicas := m.Spec.Size
+	dep := &appsv1.DeploymentConfig{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      m.Name,
+			Namespace: m.Namespace,
+		},
+		Spec: appsv1.DeploymentConfigSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: ls,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: ls,
+				},
+				Spec: corev1.PodSpec{
+					ServiceAccountName: "busybox-operator",
+					Containers: []corev1.Container{{
+                                        	Name: "busybox",
+						Image: "busybox",
+						ImagePullPolicy: corev1.PullAlways,
+			                        Command: []string{"sleep", "3600"},
+					}},	
+				},
+			},
+		},
+	}
+	// Set instance as the owner of the Deployment.
+	controllerutil.SetControllerReference(m, dep, r.scheme)
+	return dep
 }
