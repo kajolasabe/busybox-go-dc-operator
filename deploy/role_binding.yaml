@@ -1,11 +1,11 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: busybox-go-operator
+  name: busybox-go-dc-operator
 subjects:
 - kind: ServiceAccount
-  name: busybox-go-operator
+  name: busybox-go-dc-operator
 roleRef:
   kind: Role
-  name: busybox-go-operator
+  name: busybox-go-dc-operator
   apiGroup: rbac.authorization.k8s.io
