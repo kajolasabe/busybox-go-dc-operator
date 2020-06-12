@@ -1,11 +1,10 @@
-apiVersion: apps/v1
+apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
   name: busybox-go-dc-operator
 spec:
   replicas: 1
   selector:
-    matchLabels:
       name: busybox-go-dc-operator
   template:
     metadata:

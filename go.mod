@@ -1,4 +1,4 @@
-module persistent.com/busybox/busybox-go-operator
+module persistent.com/busybox/busybox-go-dc-operator
 
 go 1.13
 
