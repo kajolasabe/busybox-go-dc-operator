@@ -158,7 +158,7 @@ func (r *ReconcileBusybox) deployconfigForBusybox(m *busyboxv1alpha1.Busybox) *a
 		"app": m.Name,
 	}
 	replicas := m.Spec.Size
-	dep := &appsv1.DeploymentConfig{
+	dep := appsv1.DeploymentConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      m.Name,
 			Namespace: m.Namespace,
@@ -166,7 +166,7 @@ func (r *ReconcileBusybox) deployconfigForBusybox(m *busyboxv1alpha1.Busybox) *a
 		Spec: appsv1.DeploymentConfigSpec{
 			Replicas: replicas,
 			Selector: metav1.LabelSelector{
-				MatchLabels: ls,
+				Name: m.Name,
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
