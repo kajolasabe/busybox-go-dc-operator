@@ -3,7 +3,7 @@ package busybox
 import (
 	"context"
 
-	appsv1 "k8s.io/api/apps/v1"
+	appsv1 "apps.openshift.io/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -125,7 +125,7 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	// deployment;config created successfully - don't requeue
-	currentStatus="DeploymentConfig created"
+	currentStatus:="DeploymentConfig created"
 	if !reflect.DeepEqual(currentStatus, instance.Status.Status) {
 		instance.Status.Status=currentStatus
 		if err := r.client.Status().Update(context.TODO(), instance); err != nil {
