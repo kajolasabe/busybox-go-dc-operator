@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"persistent.com/busybox/busybox-go-operator/pkg/apis/busybox/v1alpha1"
+	"persistent.com/busybox/busybox-go-dc-operator/pkg/apis/busybox/v1alpha1"
 )
 
 func init() {
