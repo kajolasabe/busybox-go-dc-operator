@@ -142,8 +142,8 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 	// Ensure the deployment size is the same as the spec
 	size := instance.Spec.Size
-	if *deployconfig.Spec.Replicas != size {
-		deployconfig.Spec.Replicas = &size
+	if deployconfig.Spec.Replicas != size {
+		deployconfig.Spec.Replicas = size
 		err = r.client.Update(context.TODO(), deployconfig)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update Deployment.", "DeploymentConfig.Namespace", deployconfig.Namespace, "DeploymentConfig.Name", deployconfig.Name)
@@ -164,8 +164,8 @@ func (r *ReconcileBusybox) deployconfigForBusybox(m *busyboxv1alpha1.Busybox) *a
 			Namespace: m.Namespace,
 		},
 		Spec: appsv1.DeploymentConfigSpec{
-			Replicas: &replicas,
-			Selector: &metav1.LabelSelector{
+			Replicas: replicas,
+			Selector: metav1.LabelSelector{
 				MatchLabels: ls,
 			},
 			Template: corev1.PodTemplateSpec{
