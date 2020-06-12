@@ -165,9 +165,7 @@ func (r *ReconcileBusybox) deployconfigForBusybox(m *busyboxv1alpha1.Busybox) *a
 		},
 		Spec: appsv1.DeploymentConfigSpec{
 			Replicas: replicas,
-			Selector: metav1.LabelSelector{
-				MatchLabels: m.Name,
-			},
+			Selector: ls,
 			Template: &corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: ls,
