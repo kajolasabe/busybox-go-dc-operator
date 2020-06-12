@@ -1,24 +1,24 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DeploymentConfig
 metadata:
-  name: busybox-go-operator
+  name: busybox-go-dc-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: busybox-go-operator
+      name: busybox-go-dc-operator
   template:
     metadata:
       labels:
-        name: busybox-go-operator
+        name: busybox-go-dc-operator
     spec:
-      serviceAccountName: busybox-go-operator
+      serviceAccountName: busybox-go-dc-operator
       containers:
-        - name: busybox-go-operator
+        - name: busybox-go-dc-operator
           # Replace this with the built image name
-          image: quay.io/dhananjaysisode/busybox-operator:v0.0.1
+          image: quay.io/kajolasabe/busybox-go-dc-operator:v0.0.1
           command:
-          - busybox-go-operator
+          - busybox-go-dc-operator
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -31,3 +31,18 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "busybox-go-operator"
+  triggers:
+    - type: "ConfigChange"
+    - type: "ImageChange"
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - "helloworld"
+        from:
+          kind: "ImageStreamTag"
+          name: "busybox-go-dc-operator:latest"
+  strategy:
+    type: "Rolling"
+  paused: false
+  revisionHistoryLimit: 2
+  minReadySeconds: 0
