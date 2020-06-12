@@ -9,6 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
 	busyboxv1alpha1 "persistent.com/busybox/busybox-go-dc-operator/pkg/apis/busybox/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -100,6 +101,14 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
+		return reconcile.Result{}, err
+	}
+	
+	s := scheme.Scheme
+
+	//Add route Openshift scheme
+	if err := appsv1.AddToScheme(s); err != nil {
+		reqLogger.Error(err, "Failed to add DeploymentConfig scheme.")
 		return reconcile.Result{}, err
 	}
 
