@@ -103,6 +103,14 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
+	// instance created successfully
+	currentStatus:="Busybox instance created"
+	if !reflect.DeepEqual(currentStatus, instance.Status.Status) {
+	instance.Status.Status=currentStatus
+	if err := r.client.Status().Update(context.TODO(), instance); err != nil {
+		return reconcile.Result{},err
+	}}
+	
 	// Check if the Deployment already exists, if not create a new one
 	deployment := &appsv1.Deployment{}
 	err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, deployment)
