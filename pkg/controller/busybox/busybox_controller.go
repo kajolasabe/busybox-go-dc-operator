@@ -3,7 +3,7 @@ package busybox
 import (
 	"context"
 
-	appsv1 "k8s.io/api/apps/v1"
+	appsv1 "github.com/openshift/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -112,15 +112,15 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 	}}
 	
 	// Check if the Deployment already exists, if not create a new one
-	deployment := &appsv1.Deployment{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, deployment)
+	deployconfig := &appsv1.DeploymentConfig{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, deployconfig)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new Deployment
-		dep := r.deploymentForBusybox(instance)
-		reqLogger.Info("Creating a new Deployment.", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
+		dep := r.deployconfigForBusybox(instance)
+		reqLogger.Info("Creating a new Deployment.", "DeploymentConfig.Namespace", dep.Namespace, "DeploymentConfig.Name", dep.Name)
 		err = r.client.Create(context.TODO(), dep)
 		if err != nil {
-			reqLogger.Error(err, "Failed to create new Deployment.", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
+			reqLogger.Error(err, "Failed to create new Deployment.", "DeploymentConfig.Namespace", dep.Namespace, "DeploymentConfig.Name", dep.Name)
 			return reconcile.Result{}, err
 		}
 		// Deployment created successfully - return and requeue
@@ -133,7 +133,7 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	// deployment created successfully - don't requeue
-	currentStatus="Deployment created"
+	currentStatus="DeploymentConfig created"
 	if !reflect.DeepEqual(currentStatus, instance.Status.Status) {
 		instance.Status.Status=currentStatus
 		if err := r.client.Status().Update(context.TODO(), instance); err != nil {
@@ -142,28 +142,28 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 	// Ensure the deployment size is the same as the spec
 	size := instance.Spec.Size
-	if *deployment.Spec.Replicas != size {
-		deployment.Spec.Replicas = &size
-		err = r.client.Update(context.TODO(), deployment)
+	if *deployconfig.Spec.Replicas != size {
+		deployconfig.Spec.Replicas = &size
+		err = r.client.Update(context.TODO(), deployconfig)
 		if err != nil {
-			reqLogger.Error(err, "Failed to update Deployment.", "Deployment.Namespace", deployment.Namespace, "Deployment.Name", deployment.Name)
+			reqLogger.Error(err, "Failed to update Deployment.", "DeploymentConfig.Namespace", deployconfig.Namespace, "DeploymentConfig.Name", deployconfig.Name)
 			return reconcile.Result{}, err
 		}
 	}
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileBusybox) deploymentForBusybox(m *busyboxv1alpha1.Busybox) *appsv1.Deployment {
+func (r *ReconcileBusybox) deployconfigForBusybox(m *busyboxv1alpha1.Busybox) *appsv1.DeploymentConfig {
 	ls := map[string]string{
 		"app": m.Name,
 	}
 	replicas := m.Spec.Size
-	dep := &appsv1.Deployment{
+	dep := &appsv1.DeploymentConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      m.Name,
 			Namespace: m.Namespace,
 		},
-		Spec: appsv1.DeploymentSpec{
+		Spec: appsv1.DeploymentConfigSpec{
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: ls,
