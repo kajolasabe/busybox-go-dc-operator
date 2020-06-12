@@ -173,7 +173,7 @@ func (r *ReconcileBusybox) deploymentForBusybox(m *busyboxv1alpha1.Busybox) *app
 					Labels: ls,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: "busybox-go-dc-operator",
+					ServiceAccountName: "busybox-operator",
 					Containers: []corev1.Container{{
                                         	Name: "busybox",
 						Image: "busybox",
