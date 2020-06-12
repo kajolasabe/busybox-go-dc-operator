@@ -29,19 +29,4 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "busybox-go-operator"
-  triggers:
-    - type: "ConfigChange"
-    - type: "ImageChange"
-      imageChangeParams:
-        automatic: true
-        containerNames:
-          - "helloworld"
-        from:
-          kind: "ImageStreamTag"
-          name: "busybox-go-dc-operator:latest"
-  strategy:
-    type: "Rolling"
-  paused: false
-  revisionHistoryLimit: 2
-  minReadySeconds: 0
+              value: "busybox-go-dc-operator"
