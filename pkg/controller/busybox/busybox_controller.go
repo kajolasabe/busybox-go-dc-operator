@@ -103,47 +103,47 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
-	// Check if the DeploymentConfig already exists, if not create a new one
-	deployConfig := &appsv1.DeploymentConfig{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, deployConfig)
+	// Check if the Deployment already exists, if not create a new one
+	deployment := &appsv1.Deployment{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, deployment)
 	if err != nil && errors.IsNotFound(err) {
-		// Define a new DeploymentConfig
-		dc := r.deployConfigForBusybox(instance)
-		reqLogger.Info("Creating a new Deployment Config.", "DeploymentConfig.Namespace", dc.Namespace, "DeploymentConfig.Name", dc.Name)
-		err = r.client.Create(context.TODO(), dc)
+		// Define a new Deployment
+		dep := r.deploymentForBusybox(instance)
+		reqLogger.Info("Creating a new Deployment.", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
+		err = r.client.Create(context.TODO(), dep)
 		if err != nil {
-			reqLogger.Error(err, "Failed to create new Deployment Config.", "DeploymentConfig.Namespace", dc.Namespace, "DeploymentConfig.Name", dc.Name)
+			reqLogger.Error(err, "Failed to create new Deployment.", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
 			return reconcile.Result{}, err
 		}
-		// DeploymentConfig created successfully - return and requeue
-		// NOTE: that the requeue is made with the purpose to provide the deploymentconfig object for the next step to ensure the deploymentconfig size is the same as the spec.
-		// Also, you could GET the deploymentconfig object again instead of requeue if you wish. See more over it here: https://godoc.org/sigs.k8s.io/controller-runtime/pkg/reconcile#Reconciler
+		// Deployment created successfully - return and requeue
+		// NOTE: that the requeue is made with the purpose to provide the deployment object for the next step to ensure the deployment size is the same as the spec.
+		// Also, you could GET the deployment object again instead of requeue if you wish. See more over it here: https://godoc.org/sigs.k8s.io/controller-runtime/pkg/reconcile#Reconciler
 		return reconcile.Result{Requeue: true}, nil
 	} else if err != nil {
-		reqLogger.Error(err, "Failed to get Deployment Config.")
+		reqLogger.Error(err, "Failed to get Deployment.")
 		return reconcile.Result{}, err
 	}
 
-	// deployment;config created successfully - don't requeue
-	currentStatus:="DeploymentConfig created"
+	// deployment created successfully - don't requeue
+	currentStatus="Deployment created"
 	if !reflect.DeepEqual(currentStatus, instance.Status.Status) {
 		instance.Status.Status=currentStatus
 		if err := r.client.Status().Update(context.TODO(), instance); err != nil {
 			return reconcile.Result{},err
 		}
 	}
-	// Ensure the deploymentconfig size is the same as the spec
+	// Ensure the deployment size is the same as the spec
 	size := instance.Spec.Size
-	if *deployConfig.Spec.Replicas != size {
-		deployConfig.Spec.Replicas = &size
-		err = r.client.Update(context.TODO(), deployConfig)
+	if *deployment.Spec.Replicas != size {
+		deployment.Spec.Replicas = &size
+		err = r.client.Update(context.TODO(), deployment)
 		if err != nil {
-			reqLogger.Error(err, "Failed to update Deployment Config.", "DeploymentConfig.Namespace", deployConfig.Namespace, "DeploymentDonfig.Name", deployConfig.Name)
+			reqLogger.Error(err, "Failed to update Deployment.", "Deployment.Namespace", deployment.Namespace, "Deployment.Name", deployment.Name)
 			return reconcile.Result{}, err
 		}
 	}
 	return reconcile.Result{}, nil
-	
+
 	/*// Define a new Pod object
 	pod := newPodForCR(instance)
 
@@ -196,17 +196,17 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 }*/
 
-func (r *ReconcileBusybox) deploymentConfigForBusybox(m *busyboxv1alpha1.Busybox) *appsv1.DeploymentConfig {
+func (r *ReconcileBusybox) deploymentForBusybox(m *busyboxv1alpha1.Busybox) *appsv1.Deployment {
 	ls := map[string]string{
 		"app": m.Name,
 	}
 	replicas := m.Spec.Size
-	dep := &appsv1.DeploymentConfig{
+	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      m.Name,
 			Namespace: m.Namespace,
 		},
-		Spec: appsv1.DeploymentConfigSpec{
+		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: ls,
