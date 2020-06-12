@@ -124,7 +124,7 @@ func (r *ReconcileBusybox) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
-	// deploymentconfig created successfully - don't requeue
+	// deployment;config created successfully - don't requeue
 	currentStatus="DeploymentConfig created"
 	if !reflect.DeepEqual(currentStatus, instance.Status.Status) {
 		instance.Status.Status=currentStatus
